@@ -1,0 +1,13 @@
+name = Contextual links
+description = Provides contextual links to perform actions related to elements on a page.
+package = Core
+version = VERSION
+core = 7.x
+files[] = contextual.test
+
+
+; Information added by drush on 2015-04-15
+version = "7.35+32-dev"
+project = "drupal"
+datestamp = "1429125112"
+

@@ -1,0 +1,16 @@
+name = Search
+description = Enables site-wide keyword searching.
+package = Core
+version = VERSION
+core = 7.x
+files[] = search.extender.inc
+files[] = search.test
+configure = admin/config/search/settings
+stylesheets[all][] = search.css
+
+
+; Information added by drush on 2015-04-15
+version = "7.35+32-dev"
+project = "drupal"
+datestamp = "1429125112"
+

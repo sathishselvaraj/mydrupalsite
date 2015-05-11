@@ -1,0 +1,13 @@
+name = "Image test"
+description = "Support module for image toolkit tests."
+package = Testing
+version = VERSION
+core = 7.x
+hidden = TRUE
+
+
+; Information added by drush on 2015-04-15
+version = "7.35+32-dev"
+project = "drupal"
+datestamp = "1429125112"
+

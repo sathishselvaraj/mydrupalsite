@@ -1,0 +1,14 @@
+name = "Taxonomy test module"
+description = "Tests functions and hooks not used in core".
+package = Testing
+version = VERSION
+core = 7.x
+hidden = TRUE
+dependencies[] = taxonomy
+
+
+; Information added by drush on 2015-04-15
+version = "7.35+32-dev"
+project = "drupal"
+datestamp = "1429125112"
+

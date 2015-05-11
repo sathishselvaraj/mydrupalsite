@@ -1,0 +1,21 @@
+.amount-owe td, .car-pool-summary td {
+font-weight: bold;
+} 
+.postive {
+  font-size: 14px;
+  color:green;
+}
+.negative {
+  font-size: 14px;
+  color:red;
+}
+
+.amount-owe span.amt{
+background-color: yellow;
+}
+/*
+#header #main-menu {
+background:url(../images/header_bg.png) left bottom;
+border:none !important;
+}
+*/

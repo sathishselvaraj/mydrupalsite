@@ -1,0 +1,404 @@
+<?php
+
+function car_pool_form($node, $form_state) {
+  $type = node_type_get_type($node);
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => check_plain($type->title_label),
+    '#default_value' => !empty($node->title) ? $node->title : '',
+    '#required' => FALSE,
+    '#weight' => -5
+  );
+  drupal_add_css(drupal_get_path('module', 'car_pool') . "/css/car_pool.css");
+  return $form;
+}
+
+function car_pool_menu() {
+    $items['car_pool/calc'] = array(
+         'page callback' => '_car_pool_expense_calc',
+         'page arguments' => array(2),
+         'access callback' => 'user_access',
+         'access arguments' => array('administer car_pool configuration'),
+         'type' => MENU_NORMAL_ITEM,
+    );
+    $items['car_pool/calc/%'] = array(
+         'page callback' => '_car_pool_expense_calc',
+	 'page arguments' => array(2),
+         'access callback' => 'user_access',
+         'access arguments' => array('administer car_pool configuration'),	
+         'type' => MENU_NORMAL_ITEM,
+    );
+
+    return $items;
+}
+
+function car_pool_permission() {
+  return array(
+    'administer car_pool configuration' => array(
+      'title' => t('Administer Car Pool  module'),
+      'description' => t('Perform administration tasks for Car Pool module.'),
+    ),
+  );
+}
+function car_pool_node_presave($node) {
+	$price_node = node_load(18);
+ 	$gas = $price_node->field_gas['und'][0]['value'];
+	$sathish_spent = 0;
+        $adnan_spent = 0;
+        $natesh_spent = 0;
+        $sathish_exp = 0;
+        $adnan_exp = 0;
+        $natesh_exp = 0;
+        $no_of_person = 0;
+        $hidden_who_are_all_with = array();
+       
+        foreach ($node->field_who_are_all_with['und'] as $k => $v) {
+            if ($v['value'] == 0) {
+                $hidden_who_are_all_with[]= 'Sathish';
+            } else if ($v['value'] == 1) {
+                $hidden_who_are_all_with[]= 'Adnan';
+            } else {
+                $hidden_who_are_all_with[]= 'Natesh';
+            }
+        }
+       
+        $node->field_hidden_who_are_all_with['und'][0]['value'] = implode(', ', $hidden_who_are_all_with);
+        if (count($node->field_who_are_all_with['und']) == 2) {
+           $gw_toll = $price_node->field_gw_toll_price_wo_discount['und'][0]['value'];
+           $no_of_person = 2;
+        } else {
+           $gw_toll = $price_node->field_gw_toll_price_with_discoun['und'][0]['value'];
+           $no_of_person = 3;
+        }
+        ($node->field_tnb_toll['und'][0]['value'] == 1) ? $tnb_toll = $price_node->field_tnb_toll_price_with_discou['und'][0]['value'] : $tnb_toll = $price_node->field_tnb_toll_price_wo_discount['und'][0]['value'];
+	    if ($node->field_who_s_car['und'][0]['value'] == 0) {
+                $sathish_spent = $gas;
+                if ($node->field_gw_toll['und'][0]['value'] == 0) {
+                    $sathish_spent = $sathish_spent + $gw_toll;
+                } else if ($node->field_gw_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $gw_toll;
+                } else {
+                  $natesh_spent = $natesh_spent + $gw_toll;
+                }
+                if ($node->field_tnb_toll['und'][0]['value'] == 0) {
+                    $sathish_spent = $sathish_spent + $tnb_toll;
+                } else if ($node->field_tnb_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $tnb_toll;
+                } else {
+                  $natesh_spent = $natesh_spent + $tnb_toll;
+                }
+       	 } else if ($node->field_who_s_car['und'][0]['value'] == 1) {              
+ 		        $adnan_spent = $gas;
+                if ($node->field_gw_toll['und'][0]['value'] == 0) {
+                    $sathish_spent = $sathish_spent + $gw_toll;
+                } else if ($node->field_gw_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $gw_toll;
+                } else {
+                  $natesh_spent = $natesh_spent+ $gw_toll;
+                }
+ 				if ($node->field_tnb_toll['und'][0]['value'] == 0) {
+                    $sathish_spent =$sathish_spent + $tnb_toll;
+                } else if ($node->field_tnb_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $tnb_toll;
+                } else {
+                  $natesh_spent = $natesh_spent + $tnb_toll;
+                }
+        } else {
+                $natesh_spent = $gas;
+                if ($node->field_gw_toll['und'][0]['value'] == 0) {
+                    $sathish_spent = $sathish_spent + $gw_toll;
+                } else if ($node->field_gw_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $gw_toll;
+                } else {
+                  $natesh_spent = $natesh_spent+ $gw_toll;
+                }
+                if ($node->field_tnb_toll['und'][0]['value'] == 0) {
+                    $sathish_spent =$sathish_spent + $tnb_toll;
+                } else if ($node->field_tnb_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $tnb_toll;
+                } else {
+                  $natesh_spent = $natesh_spent + $tnb_toll;
+                }
+        }
+	$node->field_sathish_spent['und'][0]['value'] = $sathish_spent;
+	$node->field_adnan_spent['und'][0]['value'] = $adnan_spent;
+	$node->field_natesh_spent['und'][0]['value'] = $natesh_spent;
+    
+	$exp_per_person =round(($sathish_spent + $adnan_spent + $natesh_spent) / $no_of_person, 2);
+        foreach ($node->field_who_are_all_with['und'] as $k => $v) {
+           if($v['value'] == 0) {
+                 $node->field_sathish_exp['und'][0]['value'] = $exp_per_person;
+           } else if ($v['value'] == 1) {
+    		      $node->field_adnan_exp['und'][0]['value'] = $exp_per_person;           
+    	   } else {
+    		      $node->field_natesh_exp['und'][0]['value'] = $exp_per_person;  
+           }
+        }
+	 
+}
+
+function _car_pool_expense_calc($month ="") {
+	if ($month != "") {	
+	$month = date("m", strtotime($month));
+	} else {
+	$month =  date("m",time());
+	}
+	$name = array(0=>'Sathish', 1=>'Adnan', 2=>'Natesh');
+	$year = date("Y", time());
+	$price_node = node_load(18);
+        $gas = $price_node->field_gas['und'][0]['value'];
+	$total_exp['expense_info']['gas'] = $gas;
+	$total_exp['expense_info']['gw_toll_wo_discount'] = $price_node->field_gw_toll_price_wo_discount['und'][0]['value'];
+	$total_exp['expense_info']['gw_toll_with_discount'] = $price_node->field_gw_toll_price_with_discoun['und'][0]['value'];
+	$total_exp['expense_info']['tnb_wo_discount'] = $price_node->field_tnb_toll_price_wo_discount['und'][0]['value'];
+	$total_exp['expense_info']['tnb_with_discount'] = $price_node->field_tnb_toll_price_with_discou['und'][0]['value'];
+	$query = new EntityFieldQuery();
+	$query->entityCondition('entity_type', 'node')
+             ->entityCondition('bundle', 'car_pool')
+             ->propertyCondition('status', 1);
+	$month_range = array("$year-$month-01", "$year-$month-31");
+	$query->fieldCondition('field_car_pool_date', 'value', (array)$month_range, 'BETWEEN')
+	->fieldOrderBy('field_car_pool_date', 'value', 'ASC');
+        $entities = $query->execute();
+
+	$nodes = entity_load('node', array_keys($entities['node']));
+     	foreach ($nodes as $node) {
+	$sathish_spent = 0;
+	$adnan_spent = 0;
+	$natesh_spent = 0;
+	$sathish_exp = 0;
+	$adnan_exp = 0;
+	$natesh_exp = 0;
+	$no_of_person = 0;
+	$daily_exp = array();
+	if (count($node->field_who_are_all_with['und']) == 2) {
+           $gw_toll = $price_node->field_gw_toll_price_wo_discount['und'][0]['value'];
+	   $no_of_person = 2;
+        } else {
+           $gw_toll = $price_node->field_gw_toll_price_with_discoun['und'][0]['value'];
+           $no_of_person = 3;
+        }
+        ($node->field_tnb_toll['und'][0]['value'] == 1) ? $tnb_toll = $price_node->field_tnb_toll_price_with_discou['und'][0]['value'] : $tnb_toll = $price_node->field_tnb_toll_price_wo_discount['und'][0]['value'];	
+	if ($node->field_who_s_car['und'][0]['value'] == 0) {
+		$sathish_spent = $gas;
+		if ($node->field_gw_toll['und'][0]['value'] == 0) {
+		    $sathish_spent = $sathish_spent + $gw_toll;
+		} else if ($node->field_gw_toll['und'][0]['value'] == 1) {
+		    $adnan_spent = $adnan_spent + $gw_toll;
+		} else {
+		  $natesh_spent = $natesh_spent + $gw_toll;
+		}
+		
+		if ($node->field_tnb_toll['und'][0]['value'] == 0) {
+                    $sathish_spent = $sathish_spent + $tnb_toll;
+                } else if ($node->field_tnb_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $tnb_toll;
+                } else {
+                  $natesh_spent = $natesh_spent + $tnb_toll;
+                }
+	} else if ($node->field_who_s_car['und'][0]['value'] == 1) {
+                $adnan_spent = $gas;
+                if ($node->field_gw_toll['und'][0]['value'] == 0) {
+                    $sathish_spent = $sathish_spent + $gw_toll;
+                } else if ($node->field_gw_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $gw_toll;
+                } else {
+                  $natesh_spent = $natesh_spent+ $gw_toll;
+                }
+
+                if ($node->field_tnb_toll['und'][0]['value'] == 0) {
+                    $sathish_spent =$sathish_spent + $tnb_toll;
+                } else if ($node->field_tnb_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $tnb_toll;
+                } else {
+                  $natesh_spent = $natesh_spent + $tnb_toll;
+                }
+        } else {
+                $natesh_spent = $gas;
+                if ($node->field_gw_toll['und'][0]['value'] == 0) {
+                    $sathish_spent = $sathish_spent + $gw_toll;
+                } else if ($node->field_gw_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $gw_toll;
+                } else {
+                  $natesh_spent = $natesh_spent+ $gw_toll;
+                }
+
+                if ($node->field_tnb_toll['und'][0]['value'] == 0) {
+                    $sathish_spent =$sathish_spent + $tnb_toll;
+                } else if ($node->field_tnb_toll['und'][0]['value'] == 1) {
+                    $adnan_spent = $adnan_spent + $tnb_toll;
+                } else {
+                  $natesh_spent = $natesh_spent + $tnb_toll;
+                }
+        }
+	$total_spent_by_sathish =  $total_spent_by_sathish +  $sathish_spent;
+	$total_spent_by_adnan =  $total_spent_by_adnan +  $adnan_spent;
+	$total_spent_by_natesh =  $total_spent_by_natesh +  $natesh_spent;
+	$exp_date_int = strtotime($node->field_car_pool_date['und'][0]['value']);
+	$exp_date_format = date('M-d-Y', $exp_date_int); 
+	$daily_exp['date'] = $exp_date_format;
+	$daily_exp['whos_car'] = $name[$node->field_who_s_car['und'][0]['value']] . "'s Car";
+	$daily_exp['GW_toll'] = $name[$node->field_gw_toll['und'][0]['value']] . "'s EZ-P";
+	$daily_exp['TNB_toll'] = $name[$node->field_tnb_toll['und'][0]['value']] . "'s EZ-P";
+	$daily_exp['sathish_spent'] = $sathish_spent;
+	$daily_exp['adnan_spent'] = $adnan_spent;
+	$daily_exp['natesh_spent'] = $natesh_spent;
+	$daily_exp['no_of_person'] = $no_of_person;
+	$exp_per_person =round(($sathish_spent + $adnan_spent + $natesh_spent) / $no_of_person, 2);
+	foreach ($node->field_who_are_all_with['und'] as $k => $v) {
+	   if($v['value'] == 0) {
+		 $daily_exp['sathish_exp'] = $exp_per_person;
+         $sathish_total_exp = $sathish_total_exp + $exp_per_person;
+		 $daily_exp['person_carpooled'] = "Sathish, ";	
+	   } else if ($v['value'] == 1) {
+	   	 $daily_exp['adnan_exp'] = $exp_per_person;
+         $adnan_total_exp = $adnan_total_exp + $exp_per_person;
+ 		 $daily_exp['person_carpooled'] = $daily_exp['person_carpooled'] . "Adnan, ";
+	   } else {
+		 $daily_exp['natesh_exp'] = $exp_per_person;
+         $natesh_total_exp = $natesh_total_exp + $exp_per_person;
+ 		$daily_exp['person_carpooled'] = $daily_exp['person_carpooled'] . "Natesh";
+	   }
+	}
+ 	$daily_exp['additional_info'] = $node->body['und'][0]['value'];
+    	$everyday_exp[] = $daily_exp;
+      }
+
+$total_exp['total_spent_by_sathish'] = $total_spent_by_sathish;
+$total_exp['total_spent_by_adnan'] = $total_spent_by_adnan;
+$total_exp['total_spent_by_natesh'] = $total_spent_by_natesh;
+$total_exp['sathish_total_exp'] = $sathish_total_exp;
+$total_exp['adnan_total_exp'] = $adnan_total_exp;
+$total_exp['natesh_total_exp'] = $natesh_total_exp;
+$total_exp['sathish_net_amount'] = $total_spent_by_sathish - $sathish_total_exp;
+$total_exp['adnan_net_amount'] = $total_spent_by_adnan - $adnan_total_exp;
+$total_exp['natesh_net_amount'] = $total_spent_by_natesh - $natesh_total_exp;
+/*
+if ($total_exp['sathish_net_amount'] > $total_exp['adnan_net_amount']) {
+	if ($total_exp['sathish_net_amount'] > $total_exp['natesh_net_amount']) {
+		$total_exp['adnan_owe_sathish'] = $total_exp['sathish_net_amount'] - abs($total_exp['adnan_net_amount']);
+		$total_exp['natesh_owe_sathish'] = $total_exp['sathish_net_amount'] - abs($total_exp['natesh_net_amount']);
+	} else {
+	      $total_exp['adnan_owe_natesh'] = $total_exp['natesh_net_amount'] - abs($total_exp['adnan_net_amount']);
+	      $total_exp['sathish_owe_natesh'] = $total_exp['natesh_net_amount'] - abs($total_exp['sathish_net_amount']); 
+	}
+} else {
+	if ( $total_exp['adnan_net_amount'] > $total_exp['natesh_net_amount']) {
+             $total_exp['sathish_owe_adnan'] = $total_exp['adnan_net_amount'] - abs($total_exp['sathish_net_amount']);
+	     $total_exp['natesh_owe_adnan'] = $total_exp['adnan_net_amount'] - abs($total_exp['natesh_net_amount']);
+        } else {
+	    $total_exp['adnan_owe_natesh'] = $total_exp['natesh_net_amount'] - abs($total_exp['adnan_net_amount']);
+            $total_exp['sathish_owe_natesh'] = $total_exp['natesh_net_amount'] - abs($total_exp['sathish_net_amount']);       
+ 	}
+}*/
+$total_exp['daily_transaction'] = $everyday_exp;
+//print_r($total_exp);
+expense_output($total_exp);
+ }
+function expense_output($total_exp) {
+    print "<!DOCTYPE html>
+<html><head>";
+    
+    $css_path = drupal_get_path('module', 'car_pool') . "/css/car_pool.css";
+
+    print"<link rel=\"stylesheet\" href=\"$css_path\"></head>
+
+    <body>";
+    $toll_info_table = '<table class="toll-info">
+         <thead>
+           <tr>
+             <th>Gas / Toll</th>
+             <th>Price</th>
+           </tr>
+        </thead>
+        <tbody>';
+            $toll_info_table .= '<tr><td>Gas</td><td>' . $total_exp['expense_info']['gas'] .'</td></tr>';
+            $toll_info_table .= '<tr><td>GWB with Discount</td><td>' . $total_exp['expense_info']['gw_toll_with_discount'] . '</td></tr>';
+            $toll_info_table .= '<tr><td>GWB w/o Discount</td><td>' . $total_exp['expense_info']['gw_toll_wo_discount'] . '</td></tr>';
+            $toll_info_table .= '<tr><td>TNB with Discount</td><td>' . $total_exp['expense_info']['tnb_wo_discount'] . '</td></tr>';
+            $toll_info_table .= '<tr><td>TNB w/o Discount</td><td>' . $total_exp['expense_info']['tnb_with_discount'] . '</td></tr>';
+        $toll_info_table .= '</tbody>
+</table>';
+
+print $toll_info_table . '<br /><br /><br /><br />';
+
+
+$output = '<table class="views-table cols-12">
+         <thead>
+           <tr>
+             <th>Date</th>
+             <th>Who\'s Car</th>
+             <th>GW Toll</th>
+             <th>TNB Toll</th>
+             <th>Who Are All With?</th>
+             <th>Additional Info</th>
+             <th>Adnan Spent</th>
+             <th>Adnan Exp</th>
+             <th>Natesh Spent</th>
+             <th>Natesh Exp</th>
+             <th>Sathish Spent</th>
+             <th>Sathish Exp</th>
+           </tr>
+        </thead>
+        <tbody>';
+        $i=2;
+      foreach ($total_exp['daily_transaction'] as $k => $v) {
+            $class = ($i % 2 == 0) ? 'even' : 'odd';
+            $adnan_exp = $v['adnan_exp'] != '' ? $v['adnan_exp'] : 0; 
+            $sathish_exp = $v['sathish_exp'] != '' ? $v['sathish_exp'] : 0; 
+            $natesh_exp = $v['natesh_exp'] != '' ? $v['natesh_exp'] : 0; 
+            $output .= '<tr class="$class"><td>' . $v['date'] . '</td>';
+            $output .= '<td>' . $v['whos_car'] . '</td>';
+            $output .= '<td>' . $v['GW_toll'] . '</td>';
+            $output .= '<td>' . $v['TNB_toll'] . '</td>';
+            $output .= '<td>' . $v['person_carpooled'] . '</td>';
+            $output .= '<td>' . $v['additional_info'] . '</td>';
+            $output .= '<td>' . $v['adnan_spent'] . '</td>';
+            $output .= '<td>' . $adnan_exp . '</td>';
+            $output .= '<td>' . $v['natesh_spent'] . '</td>';
+            $output .= '<td>' . $natesh_exp . '</td>';
+            $output .= '<td>' . $v['sathish_spent'] . '</td>';
+            $output .= '<td>' . $sathish_exp . '</td>';
+            $output .= '</tr>';
+            $i++;
+            }
+            //to display the total
+            $class = ($i % 2 == 0) ? 'even' : 'odd';
+            $output .= '<tr class="$class"><td>&nbsp;</td>';
+            $output .= '<td>&nbsp;</td>';
+            $output .= '<td>&nbsp;</td>';
+            $output .= '<td>&nbsp;</td>';
+            $output .= '<td>&nbsp;</td>';
+            $output .= '<td>Total</td>';
+            $output .= '<td>' . $total_exp['total_spent_by_adnan'] . '</td>';
+            $output .= '<td>' . $total_exp['adnan_total_exp'] . '</td>';
+            $output .= '<td>' . $total_exp['total_spent_by_natesh'] . '</td>';
+            $output .= '<td>' . $total_exp['natesh_total_exp'] . '</td>';
+            $output .= '<td>' . $total_exp['total_spent_by_sathish'] . '</td>';
+            $output .= '<td>' . $total_exp['sathish_total_exp'] . '</td>';
+            $output .= '</tr>';
+            //to display net amount
+            $class = ($i % 2 == 0) ? 'even' : 'odd';
+            $adnan_net_amount = $total_exp['total_spent_by_adnan'] - $total_exp['adnan_total_exp'];
+            $natesh_net_amount = $total_exp['total_spent_by_natesh'] - $total_exp['natesh_total_exp'];
+            $sathish_net_amount = $total_exp['total_spent_by_sathish'] - $total_exp['sathish_total_exp'];
+            $output .= '<tr class="$class"><td>&nbsp;</td>';
+            $output .= '<td>&nbsp;</td>';
+            $output .= '<td>&nbsp;</td>';
+            $output .= '<td>&nbsp;</td>';
+            $output .= '<td>&nbsp;</td>';
+            $output .= '<td>Net Amount</td>';
+            $output .= '<td>(' . $total_exp['total_spent_by_adnan'] . ' - ' . $total_exp['adnan_total_exp'] . ')</td>';
+            $output .= '<td>' . $adnan_net_amount. '</td>';
+            $output .= '<td>(' . $total_exp['total_spent_by_natesh'] . ' - ' . $total_exp['natesh_total_exp'] . ')</td>';
+            $output .= '<td>' . $natesh_net_amount . '</td>';
+            $output .= '<td>(' . $total_exp['total_spent_by_sathish'] . ' - ' . $total_exp['sathish_total_exp'] .')</td>';
+            $output .= '<td>' . $sathish_net_amount . '</td>';
+            $output .= '</tr>';
+        $output .= '</tbody>
+</table>';
+print $output;
+print "</body></html>";
+}
+
+?>

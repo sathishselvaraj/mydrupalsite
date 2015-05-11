@@ -1,0 +1,13 @@
+name = "System incompatible module version test"
+description = "Support module for testing system dependencies."
+package = Testing
+version = 1.0
+core = 7.x
+hidden = TRUE
+
+
+; Information added by drush on 2015-04-15
+version = "7.35+32-dev"
+project = "drupal"
+datestamp = "1429125112"
+

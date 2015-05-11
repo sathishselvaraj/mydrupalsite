@@ -1,0 +1,11 @@
+name = Update test base theme
+description = Test theme which acts as a base theme for other test subthemes.
+core = 7.x
+hidden = TRUE
+
+
+; Information added by drush on 2015-04-15
+version = "7.35+32-dev"
+project = "drupal"
+datestamp = "1429125112"
+

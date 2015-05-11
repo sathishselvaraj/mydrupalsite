@@ -1,0 +1,6 @@
+name = Car Pool
+description = Calculating the car pool expenses
+
+version = 7.x-2.0
+core = 7.x
+
