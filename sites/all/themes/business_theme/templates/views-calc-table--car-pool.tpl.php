@@ -81,7 +81,7 @@ foreach ($totals as $type => $row): ?>
     $owe_table = '<table class="amount-owe"><thead><tr><th>Name</th><th>Amount Owe</th></tr></thead><tbody>';
     if (count($high_net) == 2) {
        $owe_table .= '<tr class="even"><td>' . $least_net[0]['name'] . ' owe ' . $high_net[0]['name'] .'</td><td><span class="amt">' . number_format($high_net[0]['amt'], 2, '.', '') . '</span></td></tr>';
-       $owe_table .= '<tr class="odd1"><td>' . $least_net[0]['name'] . ' owe ' . $high_net[1]['name'] .'</td><td><span class="amt">' . number_format($high_net[0]['amt'], 2, '.', '') . '</span></td></tr>';
+       $owe_table .= '<tr class="odd1"><td>' . $least_net[0]['name'] . ' owe ' . $high_net[1]['name'] .'</td><td><span class="amt">' . number_format($high_net[1]['amt'], 2, '.', '') . '</span></td></tr>';
     } else {
       $owe_table .= '<tr class="even"><td>' . $least_net[0]['name'] . ' owe ' . $high_net[0]['name'] .'</td><td><span class="amt">'. number_format(abs($least_net[0]['amt']), 2, '.', '') . '</span></td></tr>';
       $owe_table .= '<tr class="odd1"><td>' . $least_net[1]['name'] . ' owe ' . $high_net[0]['name'] .'</td><td><span class="amt">' . number_format(abs($least_net[1]['amt']), 2, '.', '') . '</span></td></tr>';
