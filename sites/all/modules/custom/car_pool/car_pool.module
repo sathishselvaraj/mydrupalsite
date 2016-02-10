@@ -64,8 +64,18 @@ function car_pool_permission() {
 }
 function car_pool_node_presave($node) {
 	$price_node = node_load(18);
+   // print_r($price_node);
  	$gas = $price_node->field_gas['und'][0]['value'];
-	$sathish_spent = 0;
+    
+    //setting all the hiddent fields values to 0
+    $node->field_sathish_spent['und'][0]['value'] = 0;
+    $node->field_adnan_spent['und'][0]['value'] = 0;
+    $node->field_natesh_spent['und'][0]['value'] = 0;
+    $node->field_sathish_exp['und'][0]['value'] = 0;
+    $node->field_adnan_exp['und'][0]['value'] = 0; 
+    $node->field_natesh_exp['und'][0]['value'] = 0;  
+
+	   $sathish_spent = 0;
         $adnan_spent = 0;
         $natesh_spent = 0;
         $sathish_exp = 0;
@@ -85,13 +95,45 @@ function car_pool_node_presave($node) {
         }
        
         $node->field_hidden_who_are_all_with['und'][0]['value'] = implode(', ', $hidden_who_are_all_with);
+
+//with discount
+$all_gw_prices = array();
+foreach ($price_node->field_gw_toll_prices['und'] as $gw_toll_prices_fc) {
+               $gw_prices = field_collection_item_revision_load($gw_toll_prices_fc['revision_id']);
+               $gw_date = $gw_prices->field_gw_toll_date['und'][0]['value'];
+               $all_gw_prices[$gw_date] = $gw_prices->field_gw_toll_price['und'][0]['value'];
+            }
+krsort($all_gw_prices);
+
+//without discount
+$all_gw_prices_wod = array();
+foreach ($price_node->field_gw_toll_prices_wo['und'] as $gw_toll_prices_wod_fc) {
+               $gw_prices_wod = field_collection_item_revision_load($gw_toll_prices_wod_fc['revision_id']);
+               $gw_date_wod = $gw_prices_wod->field_gw_toll_date_wod['und'][0]['value'];
+               $all_gw_prices_wod[$gw_date_wod] = $gw_prices_wod->field_gw_toll_price_wod['und'][0]['value'];
+            }
+krsort($all_gw_prices_wod);
+
+$travel_datetime = strtotime($node->field_car_pool_date['und'][0]['value']);
+$gw_toll = "";
         if (count($node->field_who_are_all_with['und']) == 2) {
-           $gw_toll = $price_node->field_gw_toll_price_wo_discount['und'][0]['value'];
-           $no_of_person = 2;
+           foreach ($all_gw_prices_wod as $gw_key_date_wod => $gw_key_price_wod) {
+                if ($travel_datetime >= $gw_key_date_wod) {
+                    $gw_toll = $gw_key_price_wod;
+                    $no_of_person = 2;
+                    break;
+                }
+           }
         } else {
-           $gw_toll = $price_node->field_gw_toll_price_with_discoun['und'][0]['value'];
-           $no_of_person = 3;
+            foreach ($all_gw_prices as $gw_key_date => $gw_key_price) {
+                if ($travel_datetime >= $gw_key_date) {
+                    $gw_toll = $gw_key_price;
+                    $no_of_person = 3;
+                    break;
+                }
+           }
         }
+
         ($node->field_tnb_toll['und'][0]['value'] == 1) ? $tnb_toll = $price_node->field_tnb_toll_price_with_discou['und'][0]['value'] : $tnb_toll = $price_node->field_tnb_toll_price_wo_discount['und'][0]['value'];
 	    if ($node->field_who_s_car['und'][0]['value'] == 0) {
                 $sathish_spent = $gas;

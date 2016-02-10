@@ -183,10 +183,10 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => 'sathishd7project',
-      'username' => 'sathishd7project',
-      'password' => 'Gjintsjs!1',
-      'host' => 'sathishd7project.db.9395000.hostedresource.com',
+      'database' => 'sathish',
+      'username' => 'optimumuser',
+      'password' => 't0rt0ise',
+      'host' => 'localhost',
       'port' => '',
       'driver' => 'mysql',
       'prefix' => '',
