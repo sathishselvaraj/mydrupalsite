@@ -1,4 +1,8 @@
 // $Id: README.txt,v 1.1 2010/12/02 00:20:18 webchick Exp $
+<<<<<<< HEAD
+// foobar
+=======
+>>>>>>> master
 
 CONTENTS OF THIS FILE
 ---------------------
